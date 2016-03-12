@@ -4,6 +4,7 @@ use clap::{Arg, App};
 
 use std::fs::File;
 use std::io::{self, Read};
+use std::process;
 
 fn main() {
     let matches = App::new("wc")
@@ -21,7 +22,10 @@ fn main() {
     if let Some(input) = matches.value_of("FILE") {
         let file = match read_file(input) {
             Ok(f) => f,
-            Err(e) => panic!(format!("{}", e)),
+            Err(e) => {
+                println!("{}", e);
+                process::exit(-1);
+            }
         };
 
         let (lines, words, chars) = count(&file[..]);
@@ -31,7 +35,8 @@ fn main() {
         let mut stdin = io::stdin();
 
         if let Err(e) = stdin.read_to_string(&mut buf) {
-            panic!(format!("{}", e));
+            println!("{}", e);
+            process::exit(-1);
         }
 
         let (lines, words, chars) = count(buf.as_bytes());
@@ -39,7 +44,7 @@ fn main() {
     }
 }
 
-/// Read file `filename into a `Vec<u8>`.
+/// Read file `filename` into a `Vec<u8>`.
 fn read_file(filename: &str) -> Result<Vec<u8>, io::Error> {
     let mut f = try!(File::open(filename));
     let mut buf: Vec<u8> = vec![];
